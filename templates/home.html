@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Onistuka — Premium Handcrafted Shoes{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Hero */
+    .hero {
+        background: var(--ink);
+        min-height: 88vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        max-width: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 70% 50%, rgba(200,169,126,0.12) 0%, transparent 65%);
+        pointer-events: none;
+    }
+
+    .hero-text {
+        padding: 6rem 5rem 6rem 10%;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-eyebrow {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .hero-eyebrow::before {
+        content: '';
+        display: block;
+        width: 32px; height: 1px;
+        background: var(--accent);
+    }
+
+    .hero-title {
+        font-size: clamp(3rem, 5vw, 5rem);
+        color: var(--white);
+        font-weight: 700;
+        line-height: 1.08;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-title em {
+        font-style: italic;
+        color: var(--accent);
+    }
+
+    .hero-desc {
+        color: rgba(255,255,255,0.55);
+        font-size: 1.05rem;
+        line-height: 1.75;
+        max-width: 420px;
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .hero-image-wrap {
+        height: 88vh;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-image-wrap img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        object-position: center;
+        opacity: 0.75;
+        transform: scale(1.02);
+        transition: transform 8s ease;
+    }
+
+    .hero-image-wrap:hover img { transform: scale(1.0); }
+
+    /* Stats bar */
+    .stats-bar {
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .stats-inner {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stat-item {
+        padding: 2rem 1.5rem;
+        text-align: center;
+        border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+
+    .stat-number {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--ink);
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    /* Category section */
+    .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .cat-card {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        height: 380px;
+        display: flex;
+        align-items: flex-end;
+        text-decoration: none;
+        background: var(--ink-soft);
+    }
+
+    .cat-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
+        z-index: 1;
+        transition: opacity 0.3s;
+    }
+
+    .cat-card:hover::before { opacity: 0.85; }
+
+    .cat-card-body {
+        position: relative;
+        z-index: 2;
+        padding: 2rem;
+        width: 100%;
+    }
+
+    .cat-card-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+    .cat-card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem;
+        color: var(--white);
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .cat-card-sub {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.82rem;
+        letter-spacing: 0.05em;
+    }
+
+    .cat-card-arrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 1rem;
+        color: var(--accent);
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        opacity: 0;
+        transform: translateX(-8px);
+        transition: all 0.25s;
+    }
+
+    .cat-card:hover .cat-card-arrow {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Decorative backgrounds for category cards */
+    .cat-men { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+    .cat-women { background: linear-gradient(135deg, #2d1b2e 0%, #1a0d1e 100%); }
+    .cat-all { background: linear-gradient(135deg, #0d1f0d 0%, #1a2e1a 100%); }
+
+    /* Why section */
+    .why-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+    }
+
+    .why-card {
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+    }
+
+    .why-icon {
+        width: 56px; height: 56px;
+        border-radius: 12px;
+        background: var(--ink);
+        color: var(--accent);
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+    }
+
+    .why-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .why-desc {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+    }
+
+    @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; }
+        .hero-image-wrap { height: 45vh; }
+        .hero-text { padding: 4rem 1.5rem; }
+        .cat-grid { grid-template-columns: 1fr; }
+        .why-grid { grid-template-columns: 1fr 1fr; }
+        .stats-inner { grid-template-columns: 1fr; }
+        .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ─── HERO ──────────────────────────────────────────────── -->
+<section class="hero">
+    <div class="hero-text">
+        <div class="hero-eyebrow">New Collection 2026</div>
+        <h1 class="hero-title">
+            Shoes Built<br>
+            for the <em>Bold</em>
+        </h1>
+        <p class="hero-desc">
+            Every pair is handcrafted by master cobblers using materials
+            that age beautifully. Wear them for years, not seasons.
+        </p>
+        <div class="hero-actions">
+            <a href="{% url 'shoe-list' %}" class="btn btn-accent">Shop Collection</a>
+            <a href="{% url 'men-shoes' %}" class="btn btn-outline" style="color:var(--white);border-color:rgba(255,255,255,0.3);">
+                Explore Men's
+            </a>
+        </div>
+    </div>
+    <div class="hero-image-wrap">
+        <!-- Fallback gradient if no static image -->
+        <div style="width:100%;height:100%;background:linear-gradient(135deg,#2a2a2a 0%,#1a1a1a 50%,#0a0a0a 100%);display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:8rem;opacity:0.15;">👟</span>
+        </div>
+    </div>
+</section>
+
+<!-- ─── STATS BAR ─────────────────────────────────────────── -->
+<div class="stats-bar">
+    <div class="stats-inner">
+        <div class="stat-item">
+            <span class="stat-number">500+</span>
+            <div class="stat-label">Styles Available</div>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">12K+</span>
+            <div class="stat-label">Happy Customers</div>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">14 Days</span>
+            <div class="stat-label">Easy Returns</div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── CATEGORIES ────────────────────────────────────────── -->
+<section class="section" style="background:var(--white);">
+    <div class="section-inner">
+        <div style="text-align:center;margin-bottom:3rem;">
+            <p style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem;">
+                Curated For You
+            </p>
+            <h2 class="section-title">Shop by Category</h2>
+            <p class="section-sub" style="margin-bottom:0;">Find your perfect pair from our curated collections</p>
+        </div>
+        <div class="cat-grid">
+            <a href="{% url 'men-shoes' %}" class="cat-card cat-men">
+                <div class="cat-card-body">
+                    <div class="cat-card-icon">👟</div>
+                    <div class="cat-card-title">Men's</div>
+                    <div class="cat-card-sub">Bold. Structured. Timeless.</div>
+                    <div class="cat-card-arrow">Shop Now →</div>
+                </div>
+            </a>
+            <a href="{% url 'women-shoes' %}" class="cat-card cat-women">
+                <div class="cat-card-body">
+                    <div class="cat-card-icon">👠</div>
+                    <div class="cat-card-title">Women's</div>
+                    <div class="cat-card-sub">Elegant. Refined. Powerful.</div>
+                    <div class="cat-card-arrow">Shop Now →</div>
+                </div>
+            </a>
+            <a href="{% url 'shoe-list' %}" class="cat-card cat-all">
+                <div class="cat-card-body">
+                    <div class="cat-card-icon">✨</div>
+                    <div class="cat-card-title">All Shoes</div>
+                    <div class="cat-card-sub">Every style. Every occasion.</div>
+                    <div class="cat-card-arrow">Browse All →</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ─── WHY ONISTUKA ──────────────────────────────────────── -->
+<section class="section">
+    <div class="section-inner">
+        <div style="text-align:center;margin-bottom:3rem;">
+            <p style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem;">
+                Our Promise
+            </p>
+            <h2 class="section-title">Why Choose Onistuka</h2>
+        </div>
+        <div class="why-grid">
+            <div class="why-card">
+                <div class="why-icon">🏆</div>
+                <div class="why-title">Premium Quality</div>
+                <p class="why-desc">Each pair passes a 47-point quality check before it reaches you.</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">🚀</div>
+                <div class="why-title">Fast Delivery</div>
+                <p class="why-desc">Orders placed before 3 PM ship the same day across India.</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">↩️</div>
+                <div class="why-title">14-Day Returns</div>
+                <p class="why-desc">Not the right fit? Return or exchange — no questions asked.</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">🔒</div>
+                <div class="why-title">Secure Payments</div>
+                <p class="why-desc">Razorpay-powered checkout. UPI, cards, net banking — all accepted.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

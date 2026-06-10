@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Login — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .auth-page {
+        min-height: calc(100vh - 68px);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .auth-visual {
+        background: linear-gradient(145deg, #0a0a0a 0%, #1a1a1a 60%, #0d1117 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .auth-visual::before {
+        content: '👟';
+        position: absolute;
+        font-size: 22rem;
+        opacity: 0.04;
+        bottom: -4rem;
+        right: -3rem;
+        transform: rotate(-25deg);
+    }
+    .auth-visual-logo {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        color: var(--white);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    .auth-visual-logo span { color: var(--accent); }
+    .auth-visual-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.25rem;
+        color: var(--white);
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+    .auth-visual-sub {
+        color: rgba(255,255,255,0.45);
+        font-size: 0.9rem;
+        line-height: 1.7;
+        text-align: center;
+        max-width: 320px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .auth-form-side {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 3rem;
+        background: var(--surface);
+    }
+
+    .auth-box { width: 100%; max-width: 400px; }
+
+    .auth-heading {
+        font-size: 1.85rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+    }
+    .auth-subheading {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 2.25rem;
+    }
+
+    .auth-footer {
+        margin-top: 1.75rem;
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+    .auth-footer a {
+        color: var(--ink);
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .auth-footer a:hover { color: var(--accent); }
+
+    .form-error-list {
+        background: #fde8e8;
+        border: 1px solid #f5c0c0;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.25rem;
+        font-size: 0.85rem;
+        color: #7b1c1c;
+    }
+
+    @media (max-width: 768px) {
+        .auth-page { grid-template-columns: 1fr; }
+        .auth-visual { display: none; }
+        .auth-form-side { padding: 3rem 1.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+
+    <!-- Visual side -->
+    <div class="auth-visual">
+        <div class="auth-visual-logo">Oni<span>stuka</span></div>
+        <h2 class="auth-visual-title">Welcome back to premium.</h2>
+        <p class="auth-visual-sub">Log in to continue shopping, track your orders, and manage your account.</p>
+    </div>
+
+    <!-- Form side -->
+    <div class="auth-form-side">
+        <div class="auth-box">
+            <h1 class="auth-heading">Sign In</h1>
+            <p class="auth-subheading">Enter your credentials to access your account</p>
+
+            {% if form.non_field_errors %}
+            <div class="form-error-list">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label" for="id_username">Username</label>
+                    <input class="form-input" type="text" name="username" id="id_username"
+                           value="{{ form.username.value|default:'' }}"
+                           placeholder="Your username" autocomplete="username" autofocus>
+                    {% if form.username.errors %}
+                        <div class="form-error">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_password">Password</label>
+                    <div style="position:relative;">
+                        <input class="form-input" type="password" name="password" id="id_password"
+                               placeholder="Your password" autocomplete="current-password"
+                               style="padding-right:3rem;">
+                        <button type="button" onclick="togglePwd('id_password', this)"
+                                style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;">
+                            👁
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="form-error">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Don't have an account? <a href="{% url 'register' %}">Create one</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁';
+    }
+}
+</script>
+{% endblock %}

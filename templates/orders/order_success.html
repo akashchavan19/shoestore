@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmed — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .success-page { max-width: 680px; margin: 5rem auto; padding: 0 2rem; text-align: center; }
+    .success-icon-wrap {
+        width: 90px; height: 90px; background: #d4edda; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem; margin: 0 auto 1.75rem;
+        animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .success-heading { font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .success-sub { color: var(--text-muted); font-size: 1rem; line-height: 1.7; margin-bottom: 2.5rem; max-width: 480px; margin-left: auto; margin-right: auto; }
+    .order-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: left; margin-bottom: 2rem; }
+    .order-card-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .order-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; padding: 0.6rem 0; border-bottom: 1px solid var(--surface-2); }
+    .order-row:last-child { border-bottom: none; }
+    .order-row-label { color: var(--text-muted); }
+    .order-row-value { font-weight: 600; color: var(--ink); }
+    .order-status { display: inline-flex; align-items: center; gap: 0.4rem; background: #d4edda; color: #1a5c2e; padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
+    .timeline { margin: 1.5rem 0 0; position: relative; }
+    .timeline::before { content: ''; position: absolute; left: 13px; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
+    .timeline-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.6rem 0; position: relative; }
+    .timeline-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; position: relative; z-index: 1; }
+    .timeline-dot.done { background: var(--success); color: var(--white); }
+    .timeline-dot.pending { background: var(--white); border: 2px solid var(--border); color: var(--text-light); }
+    .timeline-label { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.1rem; }
+    .timeline-sub { font-size: 0.78rem; color: var(--text-muted); }
+    .success-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-page page-enter">
+    <div class="success-icon-wrap">✓</div>
+    <h1 class="success-heading">Order Confirmed!</h1>
+    <p class="success-sub">
+        Thank you for your order. We've received it and will start processing shortly.
+        A confirmation email has been sent to {{ order.user.email }}.
+    </p>
+
+    {% if order %}
+    <div class="order-card">
+        <div class="order-card-title">Order Details</div>
+        <div class="order-row">
+            <span class="order-row-label">Order ID</span>
+            <span class="order-row-value">#{{ order.id }}</span>
+        </div>
+        <div class="order-row">
+            <span class="order-row-label">Date</span>
+            <span class="order-row-value">{{ order.placed_at|date:"d M Y, h:i A" }}</span>
+        </div>
+        <div class="order-row">
+            <span class="order-row-label">Subtotal</span>
+            <span class="order-row-value">₹{{ order.total_amount|floatformat:2 }}</span>
+        </div>
+        {% if order.discount_amount %}
+        <div class="order-row">
+            <span class="order-row-label">
+                Discount
+                {% if order.coupon %}
+                    <span style="font-size:0.72rem;background:var(--ink);color:var(--white);padding:0.1rem 0.5rem;border-radius:999px;margin-left:0.4rem;">{{ order.coupon.code }}</span>
+                {% endif %}
+            </span>
+            <span class="order-row-value" style="color:var(--success);">− ₹{{ order.discount_amount|floatformat:2 }}</span>
+        </div>
+        {% endif %}
+        <div class="order-row">
+            <span class="order-row-label" style="font-weight:700;">Total Charged</span>
+            <span class="order-row-value" style="font-size:1.1rem;">₹{{ order.final_amount|floatformat:2 }}</span>
+        </div>
+        <div class="order-row">
+            <span class="order-row-label">Status</span>
+            <span class="order-status">● Confirmed</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="order-card">
+        <div class="order-card-title">What Happens Next</div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot done">✓</div>
+                <div><div class="timeline-label">Order Placed</div><div class="timeline-sub">Your order is confirmed</div></div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot pending">2</div>
+                <div><div class="timeline-label">Processing</div><div class="timeline-sub">We're preparing your shoes</div></div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot pending">3</div>
+                <div><div class="timeline-label">Shipped</div><div class="timeline-sub">On its way to you</div></div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot pending">4</div>
+                <div><div class="timeline-label">Delivered</div><div class="timeline-sub">Estimated 3–5 business days</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-actions">
+        <a href="{% url 'order-history' %}" class="btn btn-primary">View My Orders</a>
+        <a href="{% url 'shoe-list' %}" class="btn btn-outline">Continue Shopping</a>
+    </div>
+</div>
+{% endblock %}

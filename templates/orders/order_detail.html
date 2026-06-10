@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .detail-page { max-width: 800px; margin: 3rem auto; padding: 0 2rem; }
+    .detail-heading { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .detail-sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; }
+    .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+    .status-pending    { background: #fff3cd; color: #856404; }
+    .status-paid       { background: #d4edda; color: #155724; }
+    .status-processing { background: #cce5ff; color: #004085; }
+    .status-shipped    { background: #e2d9f3; color: #4a235a; }
+    .status-delivered  { background: #d4edda; color: #155724; }
+    .status-cancelled  { background: #f8d7da; color: #721c24; }
+    .section-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem; }
+    .section-card-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+    .item-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid var(--surface-2); }
+    .item-row:last-child { border-bottom: none; }
+    .item-img { width: 56px; height: 56px; border-radius: 6px; overflow: hidden; background: var(--surface-2); flex-shrink: 0; }
+    .item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .item-name { font-weight: 600; font-size: 0.9rem; }
+    .item-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .item-price { margin-left: auto; font-family: 'Playfair Display', serif; font-weight: 700; }
+    .address-text { font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 0.875rem; padding: 0.4rem 0; color: var(--text-muted); }
+    .summary-row.discount { color: var(--success); font-weight: 600; }
+    .summary-row.total { font-size: 1rem; font-weight: 700; color: var(--ink); padding-top: 0.75rem; border-top: 1px solid var(--border); margin-top: 0.25rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+    <nav style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--text-light);margin-bottom:1.5rem;">
+        <a href="{% url 'order-history' %}" style="color:var(--text-muted);text-decoration:none;">My Orders</a>
+        <span>›</span>
+        <span>Order #{{ order.id }}</span>
+    </nav>
+
+    <h1 class="detail-heading">Order #{{ order.id }}</h1>
+    <div class="detail-sub">
+        <span>{{ order.placed_at|date:"d M Y, h:i A" }}</span>
+        <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+    </div>
+
+    <!-- Items -->
+    <div class="section-card">
+        <div class="section-card-title">Items Ordered</div>
+        {% for item in order.items.all %}
+        <div class="item-row">
+            <div class="item-img">
+                {% if item.shoe.image %}
+                    <img src="{{ item.shoe.image.url }}" alt="{{ item.shoe.name }}">
+                {% else %}
+                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--surface-2);">👟</div>
+                {% endif %}
+            </div>
+            <div>
+                <div class="item-name">{{ item.shoe.name }}</div>
+                <div class="item-meta">
+                    Size: {{ item.size }} &nbsp;·&nbsp;
+                    Qty: {{ item.quantity }} &nbsp;·&nbsp;
+                    ₹{{ item.price_at_purchase }} each
+                </div>
+            </div>
+            <div class="item-price">₹{{ item.subtotal|floatformat:2 }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Delivery Address -->
+    <div class="section-card">
+        <div class="section-card-title">Delivery Address</div>
+        <div class="address-text">
+            <strong>{{ order.address.full_name }}</strong><br>
+            {{ order.address.house_no }}, {{ order.address.street }}<br>
+            {{ order.address.city }}, {{ order.address.state }} — {{ order.address.pincode }}<br>
+            📞 {{ order.address.phone }}
+        </div>
+    </div>
+
+    <!-- Payment Summary -->
+    <div class="section-card">
+        <div class="section-card-title">Payment Summary</div>
+        <div class="summary-row">
+            <span>Subtotal</span>
+            <span>₹{{ order.total_amount|floatformat:2 }}</span>
+        </div>
+        {% if order.discount_amount %}
+        <div class="summary-row discount">
+            <span>
+                Discount
+                {% if order.coupon %}
+                    <span style="font-size:0.7rem;background:var(--ink);color:var(--white);padding:0.1rem 0.5rem;border-radius:999px;margin-left:0.4rem;font-weight:700;">{{ order.coupon.code }}</span>
+                {% endif %}
+            </span>
+            <span>− ₹{{ order.discount_amount|floatformat:2 }}</span>
+        </div>
+        {% endif %}
+        <div class="summary-row">
+            <span>Delivery</span>
+            <span style="color:var(--success);font-weight:600;">FREE</span>
+        </div>
+        <div class="summary-row total">
+            <span>Total Paid</span>
+            <span>₹{{ order.final_amount|floatformat:2 }}</span>
+        </div>
+    </div>
+
+    <a href="{% url 'order-history' %}" class="btn btn-outline" style="margin-top:0.5rem;">← Back to Orders</a>
+</div>
+{% endblock %}

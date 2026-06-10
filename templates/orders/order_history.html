@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .history-page { max-width: 900px; margin: 3rem auto; padding: 0 2rem; }
+    .history-heading { font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .history-sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; }
+
+    .order-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .order-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+
+    .order-id { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .order-date { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .order-items-preview { font-size: 0.85rem; color: var(--text-muted); }
+
+    .order-right { text-align: right; }
+    .order-amount { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .status-pending    { background: #fff3cd; color: #856404; }
+    .status-paid       { background: #d4edda; color: #155724; }
+    .status-processing { background: #cce5ff; color: #004085; }
+    .status-shipped    { background: #e2d9f3; color: #4a235a; }
+    .status-delivered  { background: #d4edda; color: #155724; }
+    .status-cancelled  { background: #f8d7da; color: #721c24; }
+
+    .empty-state { text-align: center; padding: 5rem 2rem; background: var(--white); border: 1px solid var(--border); border-radius: 10px; }
+    .empty-icon { font-size: 4rem; opacity: 0.25; margin-bottom: 1rem; }
+    .empty-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .empty-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.75rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <h1 class="history-heading">My Orders</h1>
+    <p class="history-sub">Track and manage all your orders in one place.</p>
+
+    {% if orders %}
+        {% for order in orders %}
+        <a href="{% url 'order-detail' order.id %}" class="order-card">
+            <div>
+                <div class="order-id">Order #{{ order.id }}</div>
+                <div class="order-date">{{ order.placed_at|date:"d M Y" }}</div>
+                <div class="order-items-preview">
+                    {% for item in order.items.all|slice:":2" %}
+                        {{ item.shoe.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    {% if order.items.count > 2 %}
+                        + {{ order.items.count|add:"-2" }} more
+                    {% endif %}
+                </div>
+            </div>
+            <div class="order-right">
+                <div class="order-amount">₹{{ order.total_amount|floatformat:2 }}</div>
+                <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+            </div>
+        </a>
+        {% endfor %}
+
+        {% if is_paginated %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-item">‹</a>
+            {% endif %}
+            {% for num in paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="page-item active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}" class="page-item">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-item">›</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <div class="empty-title">No orders yet</div>
+            <p class="empty-sub">You haven't placed any orders. Start shopping!</p>
+            <a href="{% url 'shoe-list' %}" class="btn btn-primary">Browse Shoes</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

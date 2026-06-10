@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Search "{{ query }}" — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .search-hero {
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+        padding: 2.5rem 2rem;
+    }
+    .search-hero-inner {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+    .search-eyebrow {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+    .search-heading {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    .search-heading em { font-style: italic; color: var(--accent); }
+    .search-count { font-size: 0.875rem; color: var(--text-muted); }
+
+    .search-bar-wrap {
+        margin-top: 1.5rem;
+        max-width: 520px;
+    }
+    .search-bar {
+        display: flex;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface);
+    }
+    .search-bar input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: transparent;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        color: var(--text-main);
+        outline: none;
+    }
+    .search-bar button {
+        padding: 0 1.25rem;
+        background: var(--ink);
+        color: var(--white);
+        border: none;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .search-bar button:hover { background: var(--accent); color: var(--ink); }
+
+    .products-wrap { max-width: 1280px; margin: 0 auto; padding: 3rem 2rem; }
+    .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+
+    .product-card {
+        background: var(--white);
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .product-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.1); transform: translateY(-3px); }
+    .product-img { aspect-ratio: 4/3; overflow: hidden; background: var(--surface-2); }
+    .product-img img { width:100%;height:100%;object-fit:cover;transition:transform 0.4s; }
+    .product-card:hover .product-img img { transform: scale(1.06); }
+    .product-img-placeholder {
+        width:100%;height:100%;min-height:160px;
+        display:flex;align-items:center;justify-content:center;
+        font-size:3rem;
+        background:linear-gradient(135deg,#f0ede8,#e8e4de);
+        color:rgba(0,0,0,0.12);
+    }
+    .product-body { padding: 1rem 1.15rem 1.25rem; }
+    .product-brand { font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-light);margin-bottom:0.2rem; }
+    .product-name { font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:600;color:var(--ink);margin-bottom:0.75rem;line-height:1.3; }
+    .product-footer { display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--surface-2);padding-top:0.75rem; }
+    .product-price { font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700; }
+
+    .no-results {
+        text-align: center;
+        padding: 6rem 2rem;
+        grid-column: 1/-1;
+    }
+    .no-results-icon { font-size: 4rem; opacity: 0.25; margin-bottom: 1.25rem; }
+    .no-results-title { font-family: 'Playfair Display', serif; font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .no-results-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+    @media(max-width:1024px) { .products-grid{grid-template-columns:repeat(3,1fr);} }
+    @media(max-width:700px)  { .products-grid{grid-template-columns:repeat(2,1fr);} }
+    @media(max-width:420px)  { .products-grid{grid-template-columns:1fr;} }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="search-hero">
+    <div class="search-hero-inner">
+        {% if query %}
+            <div class="search-eyebrow">Search Results</div>
+            <h1 class="search-heading">Results for <em>"{{ query }}"</em></h1>
+            <div class="search-count">{{ paginator.count }} shoe{{ paginator.count|pluralize }} found</div>
+        {% else %}
+            <h1 class="search-heading">Search Shoes</h1>
+        {% endif %}
+
+        <div class="search-bar-wrap">
+            <form action="{% url 'shoe-search' %}" method="get">
+                <div class="search-bar">
+                    <input type="text" name="q" value="{{ query }}" placeholder="Search by name, brand…" autofocus>
+                    <button type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="products-wrap">
+    <div class="products-grid">
+        {% for shoe in shoes %}
+        <div class="product-card">
+            <a href="{% url 'shoe-detail' shoe.slug %}" style="text-decoration:none;color:inherit;">
+                <div class="product-img">
+                    {% if shoe.image %}
+                        <img src="{{ shoe.image.url }}" alt="{{ shoe.name }}" loading="lazy">
+                    {% else %}
+                        <div class="product-img-placeholder">👟</div>
+                    {% endif %}
+                </div>
+                <div class="product-body">
+                    <div class="product-brand">{{ shoe.brand }}</div>
+                    <div class="product-name">{{ shoe.name }}</div>
+                    <div class="product-footer">
+                        <div class="product-price">₹{{ shoe.price }}</div>
+                        <span class="badge badge-{{ shoe.category|lower }}">{{ shoe.category }}</span>
+                    </div>
+                </div>
+            </a>
+            <div style="padding:0 1.15rem 1.15rem;display:flex;flex-direction:column;gap:0.4rem;">
+                <a href="{% url 'shoe-detail' shoe.slug %}"
+                   class="btn btn-primary"
+                   style="width:100%;padding:0.55rem;text-align:center;">
+                    Select Size & Buy
+                </a>
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'wishlist-toggle' shoe.id %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                        style="width:100%;padding:0.4rem;background:none;border:1px solid var(--border);border-radius:6px;font-size:0.75rem;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;">
+                        🤍 Wishlist
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-results">
+            <div class="no-results-icon">🔍</div>
+            <div class="no-results-title">No results found</div>
+            <p class="no-results-sub">
+                {% if query %}
+                    We couldn't find anything for <strong>"{{ query }}"</strong>. Try a different search.
+                {% else %}
+                    Enter a search term above to find your perfect pair.
+                {% endif %}
+            </p>
+            <a href="{% url 'shoe-list' %}" class="btn btn-primary">Browse All Shoes</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}" class="page-item">‹</a>
+        {% endif %}
+        {% for num in paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="page-item active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?q={{ query }}&page={{ num }}" class="page-item">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <a href="?q={{ query }}&page={{ page_obj.next_page_number }}" class="page-item">›</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+</div>
+
+{% endblock %}

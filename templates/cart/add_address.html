@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Add Address — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .address-page {
+        max-width: 600px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
+    .address-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 2.5rem;
+    }
+    .address-heading { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .address-sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="address-page">
+
+    <nav style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--text-light);margin-bottom:1.5rem;">
+        <a href="{% url 'view-cart' %}" style="color:var(--text-muted);text-decoration:none;">Cart</a>
+        <span>›</span>
+        <span>Add Address</span>
+    </nav>
+
+    <div class="address-card">
+        <h1 class="address-heading">Add Delivery Address</h1>
+        <p class="address-sub">Where should we deliver your order?</p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Full Name -->
+            <div class="form-group">
+                <label class="form-label">Full Name (Recipient)</label>
+                <input class="form-input" type="text" name="full_name"
+                       value="{{ form.full_name.value|default:'' }}"
+                       placeholder="e.g. Akash Kumar" autofocus>
+                {% if form.full_name.errors %}
+                    <div class="form-error">{{ form.full_name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input class="form-input" type="tel" name="phone"
+                       value="{{ form.phone.value|default:'' }}"
+                       placeholder="e.g. 9876543210">
+                {% if form.phone.errors %}
+                    <div class="form-error">{{ form.phone.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- House + Street -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">House / Flat No.</label>
+                    <input class="form-input" type="text" name="house_no"
+                           value="{{ form.house_no.value|default:'' }}"
+                           placeholder="e.g. 42B">
+                    {% if form.house_no.errors %}
+                        <div class="form-error">{{ form.house_no.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Street / Area</label>
+                    <input class="form-input" type="text" name="street"
+                           value="{{ form.street.value|default:'' }}"
+                           placeholder="e.g. MG Road">
+                    {% if form.street.errors %}
+                        <div class="form-error">{{ form.street.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- City -->
+            <div class="form-group">
+                <label class="form-label">City</label>
+                <input class="form-input" type="text" name="city"
+                       value="{{ form.city.value|default:'' }}"
+                       placeholder="e.g. Pune">
+                {% if form.city.errors %}
+                    <div class="form-error">{{ form.city.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- State + PIN -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">State</label>
+                    <input class="form-input" type="text" name="state"
+                           value="{{ form.state.value|default:'' }}"
+                           placeholder="e.g. Maharashtra">
+                    {% if form.state.errors %}
+                        <div class="form-error">{{ form.state.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PIN Code</label>
+                    <input class="form-input" type="text" name="pincode"
+                           value="{{ form.pincode.value|default:'' }}"
+                           placeholder="e.g. 411001"
+                           maxlength="6" inputmode="numeric">
+                    {% if form.pincode.errors %}
+                        <div class="form-error">{{ form.pincode.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Set as default -->
+            <div class="form-group" style="display:flex;align-items:center;gap:0.6rem;margin-top:0.25rem;">
+                <input type="checkbox" name="is_default" id="id_is_default"
+                       {% if form.is_default.value %}checked{% endif %}
+                       style="accent-color:var(--ink);width:16px;height:16px;">
+                <label for="id_is_default" style="font-size:0.875rem;color:var(--text-muted);cursor:pointer;">
+                    Set as my default address
+                </label>
+            </div>
+
+            <!-- Non-field errors -->
+            {% if form.non_field_errors %}
+                <div style="background:#fde8e8;border:1px solid #f5c0c0;border-radius:6px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;color:#7b1c1c;">
+                    {{ form.non_field_errors.0 }}
+                </div>
+            {% endif %}
+
+            <div style="display:flex;gap:1rem;margin-top:1.25rem;">
+                <button type="submit" class="btn btn-primary" style="flex:1;">Save Address</button>
+                <a href="{% url 'view-cart' %}" class="btn btn-outline" style="flex:1;text-align:center;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

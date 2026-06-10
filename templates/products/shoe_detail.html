@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}{{ shoe.name }} — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .detail-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 3.5rem 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: start;
+    }
+
+    .detail-image-main {
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--surface-2);
+        aspect-ratio: 1;
+    }
+    .detail-image-main img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-image-placeholder {
+        width: 100%; height: 100%; min-height: 400px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 7rem;
+        background: linear-gradient(135deg, #f0ede8, #e8e4de);
+        color: rgba(0,0,0,0.1);
+    }
+
+    .detail-eyebrow { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .detail-brand { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); }
+    .detail-title { font-size: 2.25rem; font-weight: 700; line-height: 1.15; margin-bottom: 0.5rem; }
+    .detail-price { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--ink); margin: 1.25rem 0; }
+    .detail-price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); margin-left: 0.25rem; }
+    .detail-divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .detail-section-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem; }
+
+    /* Size selector */
+    .size-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.75rem; }
+    .size-btn {
+        min-width: 52px; padding: 0.5rem 0.75rem;
+        border: 1.5px solid var(--border); border-radius: 6px;
+        background: var(--white); font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem; font-weight: 600; color: var(--text-main);
+        cursor: pointer; transition: all 0.18s; text-align: center;
+    }
+    .size-btn:hover { border-color: var(--ink); background: var(--ink); color: var(--white); }
+    .size-btn.selected { border-color: var(--accent); background: var(--accent); color: var(--ink); }
+    .size-error { border-color: var(--danger) !important; }
+
+    /* Size error message */
+    .size-error-msg {
+        display: none;
+        color: var(--danger);
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: -1rem;
+        margin-bottom: 1rem;
+    }
+    .size-error-msg.visible { display: block; }
+
+    /* Qty + actions */
+    .detail-actions { display: flex; gap: 1rem; margin-bottom: 0.75rem; }
+    .detail-qty { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: 6px; overflow: hidden; flex-shrink: 0; }
+    .qty-btn { width: 38px; height: 48px; background: var(--surface); border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-main); transition: background 0.15s; }
+    .qty-btn:hover { background: var(--surface-2); }
+    .qty-display { width: 44px; text-align: center; font-weight: 600; font-size: 0.95rem; border-left: 1px solid var(--border); border-right: 1px solid var(--border); height: 48px; display: flex; align-items: center; justify-content: center; }
+
+    .detail-description { font-size: 0.9rem; color: var(--text-muted); line-height: 1.8; }
+
+    .breadcrumb { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 0; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-light); }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--ink); }
+    .breadcrumb-sep { color: var(--border); }
+
+    @media (max-width: 768px) { .detail-wrap { grid-template-columns: 1fr; gap: 2rem; } }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="breadcrumb">
+    <a href="{% url 'home' %}">Home</a>
+    <span class="breadcrumb-sep">/</span>
+    <a href="{% url 'shoe-list' %}">Shoes</a>
+    <span class="breadcrumb-sep">/</span>
+    <span>{{ shoe.name }}</span>
+</nav>
+
+<div class="detail-wrap">
+
+    <!-- Image -->
+    <div>
+        <div class="detail-image-main">
+            {% if shoe.image %}
+                <img src="{{ shoe.image.url }}" alt="{{ shoe.name }}">
+            {% else %}
+                <div class="detail-image-placeholder">👟</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Info -->
+    <div>
+        <div class="detail-eyebrow">
+            <span class="detail-brand">{{ shoe.brand }}</span>
+            <span class="badge badge-{{ shoe.category|lower }}">{{ shoe.category }}</span>
+        </div>
+
+        <h1 class="detail-title">{{ shoe.name }}</h1>
+
+        <div class="detail-price">
+            ₹{{ shoe.price }}
+            <span>incl. all taxes</span>
+        </div>
+
+        <hr class="detail-divider">
+
+        <!-- Size selector -->
+        <div class="detail-section-label">Select Size</div>
+        <div class="size-grid" id="sizeGrid">
+            {% for size in shoe.get_size_list %}
+                <button type="button"
+                        class="size-btn"
+                        onclick="selectSize(this, '{{ size }}')">
+                    {{ size }}
+                </button>
+            {% endfor %}
+        </div>
+        <div class="size-error-msg" id="sizeErrorMsg">⚠ Please select a size before adding to cart.</div>
+
+        <!-- ADD TO CART FORM — standalone, no nesting -->
+        <form method="post" action="{% url 'add-to-cart' shoe.id %}" id="addToCartForm">
+            {% csrf_token %}
+            <input type="hidden" name="size" id="selectedSize" value="">
+            <input type="hidden" name="quantity" id="qtyInput" value="1">
+
+            <div class="detail-actions">
+                <div class="detail-qty">
+                    <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+                    <div class="qty-display" id="qtyDisplay">1</div>
+                    <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+                </div>
+                <button type="submit" class="btn btn-primary" style="flex:1;">
+                    Add to Cart
+                </button>
+            </div>
+        </form>
+
+        <!-- WISHLIST FORM — completely separate, outside the cart form -->
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'wishlist-toggle' shoe.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline" style="width:100%;margin-top:0.5rem;">
+                {% if is_wishlisted %}❤️ Remove from Wishlist{% else %}🤍 Save to Wishlist{% endif %}
+            </button>
+        </form>
+        {% endif %}
+
+        <hr class="detail-divider">
+
+        <!-- Description -->
+        <div class="detail-section-label">Description</div>
+        <p class="detail-description">{{ shoe.description }}</p>
+
+        <hr class="detail-divider">
+
+        <!-- Trust signals -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text-muted);">
+                <span>🚀</span> Same-day shipping
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text-muted);">
+                <span>↩️</span> 14-day easy returns
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text-muted);">
+                <span>🔒</span> Secure checkout
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--text-muted);">
+                <span>✅</span> Authentic product
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+let qty = 1;
+
+function selectSize(btn, size) {
+    // Clear all selected states
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected', 'size-error'));
+    // Set selected
+    btn.classList.add('selected');
+    document.getElementById('selectedSize').value = size;
+    // Hide error
+    document.getElementById('sizeErrorMsg').classList.remove('visible');
+    document.getElementById('sizeGrid').classList.remove('size-error');
+}
+
+function changeQty(delta) {
+    qty = Math.max(1, Math.min(10, qty + delta));
+    document.getElementById('qtyDisplay').textContent = qty;
+    document.getElementById('qtyInput').value = qty;
+}
+
+// Validate size before submitting cart form
+document.getElementById('addToCartForm').addEventListener('submit', function(e) {
+    const size = document.getElementById('selectedSize').value;
+    if (!size) {
+        e.preventDefault();
+        // Show error message
+        document.getElementById('sizeErrorMsg').classList.add('visible');
+        // Highlight size grid
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.add('size-error'));
+        // Scroll to size grid
+        document.getElementById('sizeGrid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+</script>
+
+{% endblock %}

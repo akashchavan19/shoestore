@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}All Shoes — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .page-hero {
+        background: var(--ink);
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    .page-hero h1 { color: var(--white); font-size: 2.75rem; margin-bottom: 0.5rem; }
+    .page-hero p  { color: rgba(255,255,255,0.45); font-size: 0.9rem; }
+
+    .shop-layout {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    .filters-panel {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.75rem;
+        position: sticky;
+        top: 88px;
+    }
+    .filter-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .filter-group { margin-bottom: 1.75rem; }
+    .filter-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-main);
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+    .filter-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0;
+        cursor: pointer;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        transition: color 0.2s;
+    }
+    .filter-option:hover { color: var(--ink); }
+    .filter-option input[type=radio] { accent-color: var(--ink); cursor: pointer; }
+
+    .filter-apply {
+        width: 100%;
+        padding: 0.65rem;
+        background: var(--ink);
+        color: var(--white);
+        border: none;
+        border-radius: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        transition: background 0.2s;
+    }
+    .filter-apply:hover { background: var(--ink-soft); }
+
+    .shop-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.75rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .results-count { font-size: 0.875rem; color: var(--text-muted); }
+    .results-count strong { color: var(--text-main); }
+
+    .active-filters {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .active-filter-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.75rem;
+        background: var(--ink);
+        color: var(--white);
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .active-filter-tag a {
+        color: rgba(255,255,255,0.6);
+        text-decoration: none;
+        font-size: 0.85rem;
+        line-height: 1;
+    }
+    .active-filter-tag a:hover { color: var(--white); }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .product-card {
+        background: var(--white);
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .product-card:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+    }
+
+    .product-img {
+        aspect-ratio: 4/3;
+        overflow: hidden;
+        background: var(--surface-2);
+    }
+    .product-img img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    .product-card:hover .product-img img { transform: scale(1.06); }
+
+    .product-img-placeholder {
+        width: 100%; height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        background: linear-gradient(135deg, #f0ede8, #e8e4de);
+        color: rgba(0,0,0,0.15);
+    }
+
+    .product-body {
+        padding: 1.1rem 1.25rem 0.75rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-brand {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-light);
+        margin-bottom: 0.2rem;
+    }
+    .product-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+    .product-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: auto;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--surface-2);
+    }
+    .product-price {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--ink);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        grid-column: 1/-1;
+    }
+    .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.4; }
+    .empty-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .empty-sub { color: var(--text-muted); font-size: 0.9rem; }
+
+    @media (max-width: 900px) {
+        .shop-layout { grid-template-columns: 1fr; }
+        .filters-panel { position: static; }
+        .products-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+        .products-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+    <h1>All Shoes</h1>
+    <p>{{ paginator.count }} style{{ paginator.count|pluralize }} available</p>
+</div>
+
+<div class="shop-layout">
+
+    <!-- Sidebar Filters -->
+    <aside class="filters-panel">
+        <div class="filter-title">Filters</div>
+        <form method="get" id="filterForm">
+
+            <div class="filter-group">
+                <span class="filter-label">Category</span>
+                <label class="filter-option">
+                    <input type="radio" name="category" value=""
+                           {% if not current_category %}checked{% endif %}> All
+                </label>
+                <label class="filter-option">
+                    <input type="radio" name="category" value="Men"
+                           {% if current_category == 'Men' %}checked{% endif %}> Men
+                </label>
+                <label class="filter-option">
+                    <input type="radio" name="category" value="Women"
+                           {% if current_category == 'Women' %}checked{% endif %}> Women
+                </label>
+                <label class="filter-option">
+                    <input type="radio" name="category" value="Unisex"
+                           {% if current_category == 'Unisex' %}checked{% endif %}> Unisex
+                </label>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">Sort By</span>
+                <label class="filter-option">
+                    <input type="radio" name="ordering" value="-created_at"
+                           {% if current_ordering == '-created_at' %}checked{% endif %}> Newest First
+                </label>
+                <label class="filter-option">
+                    <input type="radio" name="ordering" value="price"
+                           {% if current_ordering == 'price' %}checked{% endif %}> Price: Low → High
+                </label>
+                <label class="filter-option">
+                    <input type="radio" name="ordering" value="-price"
+                           {% if current_ordering == '-price' %}checked{% endif %}> Price: High → Low
+                </label>
+                <label class="filter-option">
+                    <input type="radio" name="ordering" value="name"
+                           {% if current_ordering == 'name' %}checked{% endif %}> Name: A → Z
+                </label>
+            </div>
+
+            <button type="submit" class="filter-apply">Apply Filters</button>
+
+            {% if current_category or current_ordering != '-created_at' %}
+            <a href="{% url 'shoe-list' %}"
+               style="display:block;text-align:center;margin-top:0.75rem;font-size:0.78rem;color:var(--text-muted);text-decoration:none;">
+               ✕ Clear all filters
+            </a>
+            {% endif %}
+
+        </form>
+    </aside>
+
+    <!-- Product Area -->
+    <div>
+
+        <!-- Top bar -->
+        <div class="shop-topbar">
+            <div>
+                <div class="results-count">
+                    Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong>
+                    of <strong>{{ paginator.count }}</strong> shoes
+                </div>
+
+                <!-- Active filter tags -->
+                {% if current_category or current_ordering != '-created_at' %}
+                <div class="active-filters" style="margin-top:0.5rem;">
+                    {% if current_category %}
+                    <span class="active-filter-tag">
+                        {{ current_category }}
+                        <a href="?ordering={{ current_ordering }}">✕</a>
+                    </span>
+                    {% endif %}
+                    {% if current_ordering != '-created_at' %}
+                    <span class="active-filter-tag">
+                        {% if current_ordering == 'price' %}Price: Low→High
+                        {% elif current_ordering == '-price' %}Price: High→Low
+                        {% elif current_ordering == 'name' %}Name: A→Z
+                        {% endif %}
+                        <a href="?category={{ current_category }}">✕</a>
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="products-grid">
+            {% for shoe in shoes %}
+            <div class="product-card">
+                <a href="{% url 'shoe-detail' shoe.slug %}" style="text-decoration:none;color:inherit;">
+                    <div class="product-img">
+                        {% if shoe.image %}
+                            <img src="{{ shoe.image.url }}" alt="{{ shoe.name }}" loading="lazy">
+                        {% else %}
+                            <div class="product-img-placeholder">👟</div>
+                        {% endif %}
+                    </div>
+                    <div class="product-body">
+                        <div class="product-brand">{{ shoe.brand }}</div>
+                        <div class="product-name">{{ shoe.name }}</div>
+                        <span class="badge badge-{{ shoe.category|lower }}">{{ shoe.category }}</span>
+                        <div class="product-meta">
+                            <div class="product-price">₹{{ shoe.price }}</div>
+                        </div>
+                    </div>
+                </a>
+                <div style="padding: 0 1.25rem 1.25rem;display:flex;flex-direction:column;gap:0.5rem;">
+                    <a href="{% url 'shoe-detail' shoe.slug %}"
+                       class="btn btn-primary"
+                       style="width:100%;padding:0.6rem;text-align:center;">
+                        Select Size & Buy
+                    </a>
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'wishlist-toggle' shoe.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                            style="width:100%;padding:0.45rem;background:none;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;">
+                            🤍 Wishlist
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon">👟</div>
+                <div class="empty-title">No shoes found</div>
+                <p class="empty-sub">Try adjusting your filters or check back soon.</p>
+                <a href="{% url 'shoe-list' %}" class="btn btn-primary" style="margin-top:1.5rem;">Clear Filters</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&ordering={{ current_ordering }}" class="page-item">‹</a>
+            {% endif %}
+            {% for num in paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="page-item active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}&category={{ current_category }}&ordering={{ current_ordering }}" class="page-item">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&category={{ current_category }}&ordering={{ current_ordering }}" class="page-item">›</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit when any radio is clicked — no need to press Apply
+document.querySelectorAll('#filterForm input[type=radio]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+});
+</script>
+{% endblock %}

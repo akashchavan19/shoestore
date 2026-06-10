@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Onistuka — Premium handcrafted shoes">
+    <title>{% block title %}Onistuka{% endblock %}</title>
+
+    <!-- Fonts: Playfair Display (display) + DM Sans (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* ── Design Tokens ─────────────────────────────────── */
+        :root {
+            --ink:        #0a0a0a;
+            --ink-soft:   #1a1a1a;
+            --surface:    #f5f4f0;
+            --surface-2:  #eeece7;
+            --accent:     #c8a97e;   /* warm gold */
+            --accent-dark:#a8895e;
+            --text-main:  #1a1a1a;
+            --text-muted: #6b6b6b;
+            --text-light: #9a9a9a;
+            --border:     #e0ddd6;
+            --white:      #ffffff;
+            --danger:     #c0392b;
+            --success:    #27ae60;
+        }
+
+        /* ── Base ───────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--surface);
+            color: var(--text-main);
+            font-size: 15px;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, .display {
+            font-family: 'Playfair Display', serif;
+            line-height: 1.2;
+        }
+
+        /* ── Navbar ─────────────────────────────────────────── */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--ink);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            flex-shrink: 0;
+        }
+
+        .nav-logo span { color: var(--accent); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+            margin: 0; padding: 0;
+        }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 1px;
+            background: var(--accent);
+            transition: width 0.25s ease;
+        }
+
+        .nav-links a:hover { color: var(--white); }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* ── Search ─────────────────────────────────────────── */
+        .nav-search {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .nav-search input {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: var(--white);
+            padding: 0.45rem 2.5rem 0.45rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: 'DM Sans', sans-serif;
+            width: 180px;
+            transition: all 0.25s;
+            outline: none;
+        }
+
+        .nav-search input::placeholder { color: rgba(255,255,255,0.35); }
+        .nav-search input:focus {
+            width: 240px;
+            background: rgba(255,255,255,0.12);
+            border-color: var(--accent);
+        }
+
+        .nav-search button {
+            position: absolute;
+            right: 8px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none;
+            color: rgba(255,255,255,0.5);
+            cursor: pointer; font-size: 0.85rem;
+        }
+
+        /* ── Nav Actions ─────────────────────────────────────── */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .nav-cart {
+            position: relative;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+        .nav-cart:hover { color: var(--accent); }
+
+        .nav-user-name {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.8rem;
+        }
+
+        .btn-nav {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 0.4rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-nav-outline {
+            color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+        }
+        .btn-nav-outline:hover {
+            color: var(--white);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .btn-nav-accent {
+            background: var(--accent);
+            color: var(--ink);
+        }
+        .btn-nav-accent:hover { background: var(--accent-dark); }
+
+        .btn-nav-danger {
+            background: transparent;
+            color: #e07070;
+            border: 1px solid rgba(224,112,112,0.3);
+        }
+        .btn-nav-danger:hover {
+            background: rgba(224,112,112,0.1);
+            color: #f08080;
+        }
+
+        /* ── Mobile toggle ──────────────────────────────────── */
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .mobile-toggle span {
+            display: block;
+            width: 22px; height: 2px;
+            background: var(--white);
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .mobile-menu {
+            display: none;
+            background: var(--ink-soft);
+            border-top: 1px solid rgba(255,255,255,0.07);
+            padding: 1.5rem 2rem;
+        }
+        .mobile-menu.open { display: block; }
+        .mobile-menu a, .mobile-menu button {
+            display: block;
+            padding: 0.6rem 0;
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* ── Flash Messages ─────────────────────────────────── */
+        .flash-container { max-width: 1280px; margin: 0 auto; padding: 1rem 2rem 0; }
+
+        .flash {
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .flash-success { background: #d4edda; color: #1a5c2e; border: 1px solid #b7dfc6; }
+        .flash-error   { background: #fde8e8; color: #7b1c1c; border: 1px solid #f5c0c0; }
+        .flash-info    { background: #e8f0fe; color: #1a3a6e; border: 1px solid #b8d0f8; }
+
+        /* ── Buttons (global) ────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.875rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.7rem 1.75rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.22s ease;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--ink);
+            color: var(--white);
+        }
+        .btn-primary:hover {
+            background: var(--ink-soft);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+        }
+        .btn-accent {
+            background: var(--accent);
+            color: var(--ink);
+        }
+        .btn-accent:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(200,169,126,0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--ink);
+            border: 1.5px solid var(--ink);
+        }
+        .btn-outline:hover {
+            background: var(--ink);
+            color: var(--white);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+        .btn-danger:hover { background: #a93226; }
+
+        /* ── Cards ───────────────────────────────────────────── */
+        .card {
+            background: var(--white);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: box-shadow 0.25s, transform 0.25s;
+        }
+        .card:hover {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+
+        /* ── Product card image ──────────────────────────────── */
+        .product-img-wrap {
+            overflow: hidden;
+            background: var(--surface-2);
+            aspect-ratio: 4/3;
+        }
+        .product-img-wrap img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .card:hover .product-img-wrap img { transform: scale(1.05); }
+
+        /* ── Form fields ─────────────────────────────────────── */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            background: var(--white);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(200,169,126,0.15);
+        }
+        .form-error {
+            color: var(--danger);
+            font-size: 0.78rem;
+            margin-top: 0.3rem;
+        }
+
+        /* ── Section wrapper ─────────────────────────────────── */
+        .section { padding: 5rem 2rem; }
+        .section-inner { max-width: 1280px; margin: 0 auto; }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .section-sub {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+        }
+
+        /* ── Badge ───────────────────────────────────────────── */
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .badge-men    { background: #e8f0fe; color: #1a3a6e; }
+        .badge-women  { background: #fce4ec; color: #7b1232; }
+        .badge-unisex { background: #f3e5f5; color: #4a1a6e; }
+
+        /* ── Pagination ──────────────────────────────────────── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-top: 3rem;
+        }
+        .page-item {
+            width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: 1.5px solid var(--border);
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+        .page-item:hover { border-color: var(--ink); background: var(--ink); color: var(--white); }
+        .page-item.active { background: var(--ink); color: var(--white); border-color: var(--ink); }
+        .page-item.disabled { color: var(--text-light); pointer-events: none; }
+
+        /* ── Footer ──────────────────────────────────────────── */
+        .footer {
+            background: var(--ink);
+            color: rgba(255,255,255,0.5);
+            padding: 3rem 2rem 1.5rem;
+            margin-top: 6rem;
+        }
+        .footer-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 3rem;
+        }
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--white);
+            margin-bottom: 0.75rem;
+        }
+        .footer-logo span { color: var(--accent); }
+        .footer-tagline { font-size: 0.85rem; line-height: 1.7; }
+        .footer-heading {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 1rem;
+        }
+        .footer-links { list-style: none; padding: 0; margin: 0; }
+        .footer-links li { margin-bottom: 0.5rem; }
+        .footer-links a {
+            color: rgba(255,255,255,0.55);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--accent); }
+        .footer-bottom {
+            max-width: 1280px;
+            margin: 2rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.78rem;
+            text-align: center;
+        }
+
+        /* ── Responsive ──────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .nav-links, .nav-search, .nav-actions { display: none; }
+            .mobile-toggle { display: flex; }
+            .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
+            .section { padding: 3rem 1.25rem; }
+        }
+
+        /* ── Page-enter animation ────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .page-enter { animation: fadeUp 0.4s ease both; }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ NAVBAR ══ -->
+<nav class="navbar">
+    <div class="nav-inner">
+
+        <!-- Logo -->
+        <a href="{% url 'home' %}" class="nav-logo">Oni<span>stuka</span></a>
+
+        <!-- Desktop Links -->
+        <ul class="nav-links">
+            <li><a href="{% url 'shoe-list' %}">All Shoes</a></li>
+            <li><a href="{% url 'men-shoes' %}">Men</a></li>
+            <li><a href="{% url 'women-shoes' %}">Women</a></li>
+        </ul>
+
+        <!-- Search -->
+        <div class="nav-search">
+            <form action="{% url 'shoe-search' %}" method="get">
+                <input type="text" name="q" placeholder="Search shoes…"
+                       value="{{ request.GET.q|default:'' }}">
+                <button type="submit">⌕</button>
+            </form>
+        </div>
+
+        <!-- Actions -->
+        <div class="nav-actions">
+            <a href="{% url 'view-cart' %}" class="nav-cart" title="Cart" style="position:relative;">
+                🛒
+                {% if cart_count %}
+                <span style="position:absolute;top:-6px;right:-8px;background:var(--accent);color:var(--ink);border-radius:999px;font-size:0.6rem;font-weight:700;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px;">{{ cart_count }}</span>
+                {% endif %}
+            </a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'wishlist' %}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.8rem;font-weight:500;">♡ Wishlist</a>
+                <a href="{% url 'order-history' %}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.8rem;font-weight:500;">My Orders</a>
+                <a href="{% url 'profile' %}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.8rem;font-weight:500;">My Account</a>
+                <span class="nav-user-name">{{ user.first_name|default:user.username }}</span>
+                <form method="POST" action="{% url 'logout' %}" style="margin:0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-nav btn-nav-danger">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-nav btn-nav-outline">Login</a>
+                <a href="{% url 'register' %}" class="btn-nav btn-nav-accent">Register</a>
+            {% endif %}
+        </div>
+
+        <!-- Mobile toggle -->
+        <div class="mobile-toggle" id="mobileToggle" onclick="toggleMobileMenu()">
+            <span></span><span></span><span></span>
+        </div>
+
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="{% url 'shoe-list' %}">All Shoes</a>
+        <a href="{% url 'men-shoes' %}">Men</a>
+        <a href="{% url 'women-shoes' %}">Women</a>
+        <a href="{% url 'view-cart' %}">🛒 Cart</a>
+        {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" style="background:none;border:none;padding:0.6rem 0;color:rgba(255,255,255,0.75);font-size:0.9rem;cursor:pointer;width:100%;text-align:left;">
+                    Logout
+                </button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════ MESSAGES ══ -->
+{% if messages %}
+<div class="flash-container">
+    {% for message in messages %}
+        <div class="flash {% if message.tags == 'success' %}flash-success{% elif message.tags == 'error' %}flash-error{% else %}flash-info{% endif %}">
+            {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% else %}ℹ{% endif %}
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════ CONTENT ══ -->
+<main class="page-enter">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ═══════════════════════════════════════════ FOOTER ══ -->
+<footer class="footer">
+    <div class="footer-inner">
+        <div>
+            <div class="footer-logo">Oni<span>stuka</span></div>
+            <p class="footer-tagline">
+                Premium handcrafted shoes built for those who move with intention.
+                Quality you can feel with every step.
+            </p>
+        </div>
+        <div>
+            <div class="footer-heading">Shop</div>
+            <ul class="footer-links">
+                <li><a href="{% url 'shoe-list' %}">All Shoes</a></li>
+                <li><a href="{% url 'men-shoes' %}">Men's Collection</a></li>
+                <li><a href="{% url 'women-shoes' %}">Women's Collection</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-heading">Account</div>
+            <ul class="footer-links">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'view-cart' %}">My Cart</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'register' %}">Create Account</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2026 Onistuka. Crafted with care. All rights reserved.
+    </div>
+</footer>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+}
+// Auto-dismiss flash messages after 4 seconds
+setTimeout(() => {
+    document.querySelectorAll('.flash').forEach(el => {
+        el.style.transition = 'opacity 0.4s';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 400);
+    });
+}, 4000);
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

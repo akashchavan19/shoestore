@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}My Account — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-page {
+        max-width: 900px;
+        margin: 3rem auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    /* Sidebar */
+    .profile-sidebar {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        position: sticky;
+        top: 88px;
+    }
+    .profile-avatar {
+        background: var(--ink);
+        padding: 2rem;
+        text-align: center;
+    }
+    .avatar-circle {
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--ink);
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+    }
+    .profile-name {
+        color: var(--white);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .profile-email-small {
+        color: rgba(255,255,255,0.45);
+        font-size: 0.75rem;
+        margin-top: 0.2rem;
+    }
+    .profile-nav { padding: 0.75rem 0; }
+    .profile-nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.7rem 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: all 0.2s;
+        border-left: 3px solid transparent;
+    }
+    .profile-nav a:hover {
+        color: var(--ink);
+        background: var(--surface);
+        border-left-color: var(--accent);
+    }
+    .profile-nav a.active {
+        color: var(--ink);
+        background: var(--surface);
+        border-left-color: var(--ink);
+        font-weight: 600;
+    }
+
+    /* Cards */
+    .profile-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.75rem;
+        margin-bottom: 1.25rem;
+    }
+    .profile-card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+    }
+    .profile-card-sub {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* Read-only field style */
+    .form-input[readonly] {
+        background: var(--surface);
+        color: var(--text-muted);
+        cursor: not-allowed;
+    }
+
+    /* Save button row */
+    .form-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--border);
+    }
+
+    /* Password strength */
+    .password-strength {
+        height: 3px;
+        background: var(--border);
+        border-radius: 2px;
+        margin-top: 0.4rem;
+        overflow: hidden;
+    }
+    .password-strength-bar {
+        height: 100%;
+        border-radius: 2px;
+        width: 0;
+        transition: width 0.3s, background 0.3s;
+    }
+
+    /* Stats row */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .stat-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.25rem;
+        text-align: center;
+    }
+    .stat-box-number {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--ink);
+    }
+    .stat-box-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .profile-page { grid-template-columns: 1fr; }
+        .profile-sidebar { position: static; }
+        .form-row { grid-template-columns: 1fr; }
+        .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+
+    <!-- Sidebar -->
+    <div class="profile-sidebar">
+        <div class="profile-avatar">
+            <div class="avatar-circle">
+                {{ user.first_name|first|upper|default:user.username|first|upper }}
+            </div>
+            <div class="profile-name">{{ user.get_full_name|default:user.username }}</div>
+            <div class="profile-email-small">{{ user.email }}</div>
+        </div>
+        <nav class="profile-nav">
+            <a href="{% url 'profile' %}" class="active">👤 My Profile</a>
+            <a href="{% url 'order-history' %}">📦 My Orders</a>
+            <a href="{% url 'view-cart' %}">🛒 My Cart</a>
+            <a href="{% url 'logout' %}" style="color:#c0392b;">🚪 Logout</a>
+        </nav>
+    </div>
+
+    <!-- Main content -->
+    <div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-box-number">{{ user.orders.count }}</div>
+                <div class="stat-box-label">Total Orders</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-number">{{ user.addresses.count }}</div>
+                <div class="stat-box-label">Saved Addresses</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-number">
+                    {% if user.profile.is_first_time_user %}New{% else %}Regular{% endif %}
+                </div>
+                <div class="stat-box-label">Member Status</div>
+            </div>
+        </div>
+
+        <!-- Personal Info -->
+        <div class="profile-card">
+            <div class="profile-card-title">Personal Information</div>
+            <div class="profile-card-sub">Update your name, email and phone number</div>
+
+            <form method="post" action="{% url 'profile' %}">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input class="form-input" type="text" name="first_name"
+                               value="{{ user.first_name }}" placeholder="First name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input class="form-input" type="text" name="last_name"
+                               value="{{ user.last_name }}" placeholder="Last name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input class="form-input" type="email" name="email"
+                           value="{{ user.email }}" placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input class="form-input" type="tel" name="phone"
+                           value="{{ user.profile.phone|default:'' }}"
+                           placeholder="e.g. 9876543210">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input class="form-input" type="text"
+                           value="{{ user.username }}" readonly
+                           title="Username cannot be changed">
+                    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.3rem;">
+                        Username cannot be changed after registration.
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <span style="font-size:0.78rem;color:var(--text-muted);">
+                        Member since {{ user.date_joined|date:"M Y" }}
+                    </span>
+                </div>
+            </form>
+        </div>
+
+        <!-- Change Password -->
+        <div class="profile-card">
+            <div class="profile-card-title">Change Password</div>
+            <div class="profile-card-sub">Use a strong password with at least 8 characters</div>
+
+            <form method="post" action="{% url 'change-password' %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <div style="position:relative;">
+                        <input class="form-input" type="password" name="current_password"
+                               placeholder="Enter current password" style="padding-right:3rem;" id="pwd_current">
+                        <button type="button" onclick="togglePwd('pwd_current',this)"
+                                style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);">👁</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <div style="position:relative;">
+                            <input class="form-input" type="password" name="new_password"
+                                   placeholder="Min 8 characters" style="padding-right:3rem;" id="pwd_new"
+                                   oninput="checkStrength(this.value)">
+                            <button type="button" onclick="togglePwd('pwd_new',this)"
+                                    style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);">👁</button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="strengthBar"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <div style="position:relative;">
+                            <input class="form-input" type="password" name="confirm_password"
+                                   placeholder="Repeat new password" style="padding-right:3rem;" id="pwd_confirm">
+                            <button type="button" onclick="togglePwd('pwd_confirm',this)"
+                                    style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);">👁</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-outline">Change Password</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Saved Addresses -->
+        <div class="profile-card">
+            <div class="profile-card-title">Saved Addresses</div>
+            <div class="profile-card-sub">Your delivery addresses</div>
+
+            {% for address in user.addresses.all %}
+            <div style="padding:1rem;border:1px solid var(--border);border-radius:8px;margin-bottom:0.75rem;font-size:0.875rem;color:var(--text-muted);line-height:1.7;">
+                <strong style="color:var(--ink);">{{ address.full_name }}</strong>
+                {% if address.is_default %}
+                    <span style="font-size:0.68rem;background:var(--ink);color:var(--white);padding:0.15rem 0.5rem;border-radius:999px;margin-left:0.5rem;font-weight:700;">DEFAULT</span>
+                {% endif %}
+                <br>
+                {{ address.house_no }}, {{ address.street }}<br>
+                {{ address.city }}, {{ address.state }} — {{ address.pincode }}<br>
+                📞 {{ address.phone }}
+            </div>
+            {% empty %}
+            <div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.875rem;">
+                No saved addresses yet.
+            </div>
+            {% endfor %}
+
+            <a href="{% url 'add-address' %}" class="btn btn-outline" style="margin-top:0.5rem;">
+                + Add New Address
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function togglePwd(id, btn) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '👁' : '🙈';
+}
+
+function checkStrength(val) {
+    const bar = document.getElementById('strengthBar');
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const colors = ['#e74c3c','#e67e22','#f1c40f','#27ae60'];
+    const widths  = ['25%','50%','75%','100%'];
+    bar.style.width      = score > 0 ? widths[score-1] : '0';
+    bar.style.background = score > 0 ? colors[score-1] : '';
+}
+</script>
+{% endblock %}

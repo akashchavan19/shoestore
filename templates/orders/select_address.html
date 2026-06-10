@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Select Address — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .checkout-page {
+        max-width: 900px;
+        margin: 3rem auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .checkout-step {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+    }
+    .step-dot {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .step-dot.active { background: var(--ink); color: var(--white); }
+    .step-dot.done { background: var(--success); color: var(--white); }
+    .step-dot.inactive { background: var(--border); color: var(--text-muted); }
+    .step-line { flex: 1; height: 1px; background: var(--border); }
+
+    .section-heading { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
+
+    .address-list { display: flex; flex-direction: column; gap: 1rem; }
+
+    .address-option {
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .address-option:has(input:checked) {
+        border-color: var(--ink);
+        box-shadow: 0 0 0 3px rgba(10,10,10,0.07);
+    }
+    .address-option input[type=radio] {
+        accent-color: var(--ink);
+        width: 18px; height: 18px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    .address-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.25rem; }
+    .address-text { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+    .add-address-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.1rem 1.5rem;
+        border: 1.5px dashed var(--border);
+        border-radius: 10px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: border-color 0.2s, color 0.2s;
+        margin-top: 0.5rem;
+    }
+    .add-address-link:hover { border-color: var(--ink); color: var(--ink); }
+
+    /* Mini summary */
+    .mini-summary {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.5rem;
+        position: sticky;
+        top: 88px;
+    }
+    .mini-summary-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .mini-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+    .mini-total {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--ink);
+        padding-top: 0.75rem;
+        margin-top: 0.5rem;
+        border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 700px) {
+        .checkout-page { grid-template-columns: 1fr; }
+        .mini-summary { position: static; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-page">
+
+    <div>
+        <!-- Step indicator -->
+        <div class="checkout-step">
+            <div class="step-dot done">✓</div>
+            <span>Cart</span>
+            <div class="step-line"></div>
+            <div class="step-dot active">2</div>
+            <span>Address</span>
+            <div class="step-line"></div>
+            <div class="step-dot inactive">3</div>
+            <span>Payment</span>
+        </div>
+
+        <h2 class="section-heading">Select Delivery Address</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="address-list">
+                {% for address in addresses %}
+                <label class="address-option">
+                    <input type="radio" name="address_id" value="{{ address.id }}"
+                           {% if forloop.first %}checked{% endif %}>
+                    <div>
+                        <div class="address-name">Address {{ forloop.counter }}</div>
+                        <div class="address-text">
+                            {{ address.house_no }}, {{ address.street }},<br>
+                            {{ address.city }}, {{ address.state }} — {{ address.pincode }}
+                        </div>
+                    </div>
+                </label>
+                {% empty %}
+                <div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.9rem;">
+                    No saved addresses. Add one below.
+                </div>
+                {% endfor %}
+            </div>
+
+            <a href="{% url 'add-address' %}" class="add-address-link">
+                <span style="font-size:1.25rem;">＋</span>
+                Add a new address
+            </a>
+
+            {% if addresses %}
+            <!-- Pass coupon code from cart page -->
+            <input type="hidden" name="coupon_code" value="{{ request.GET.coupon }}">
+            {% if request.GET.coupon %}
+            <div style="margin-top:1rem;padding:0.6rem 1rem;background:#d4edda;border-radius:6px;font-size:0.82rem;color:#1a5c2e;font-weight:600;">
+                🎟 Coupon <strong>{{ request.GET.coupon }}</strong> will be applied at checkout
+            </div>
+            {% endif %}
+            <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1.25rem;padding:0.85rem;">
+                Continue to Payment →
+            </button>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Mini order summary -->
+    <div class="mini-summary">
+        <div class="mini-summary-title">Your Order</div>
+        {% for item in cart_items %}
+        <div class="mini-item">
+            <span>{{ item.shoe.name }} × {{ item.quantity }}</span>
+            <span>₹{{ item.shoe.price }}</span>
+        </div>
+        {% endfor %}
+        <div class="mini-total">
+            <span>Total</span>
+            <span>₹{{ total|floatformat:2 }}</span>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

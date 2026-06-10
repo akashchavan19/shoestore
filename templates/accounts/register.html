@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account — Onistuka{% endblock %}
+
+{% block extra_head %}
+<style>
+    .auth-page {
+        min-height: calc(100vh - 68px);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+    .auth-visual {
+        background: linear-gradient(145deg, #0a0a0a 0%, #1a1a1a 60%, #0d1117 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .auth-visual::before {
+        content: '✨';
+        position: absolute;
+        font-size: 20rem;
+        opacity: 0.04;
+        bottom: -3rem;
+        right: -2rem;
+    }
+    .auth-visual-logo {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        color: var(--white);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    .auth-visual-logo span { color: var(--accent); }
+    .auth-visual-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.25rem;
+        color: var(--white);
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+    .auth-visual-sub {
+        color: rgba(255,255,255,0.45);
+        font-size: 0.9rem;
+        line-height: 1.7;
+        text-align: center;
+        max-width: 320px;
+        position: relative;
+        z-index: 1;
+    }
+    .auth-perks {
+        margin-top: 2rem;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .auth-perk {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.6);
+    }
+    .auth-perk-icon {
+        width: 28px; height: 28px;
+        background: rgba(200,169,126,0.15);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .auth-form-side {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        background: var(--surface);
+        overflow-y: auto;
+    }
+    .auth-box { width: 100%; max-width: 420px; }
+    .auth-heading { font-size: 1.85rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .auth-subheading { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .auth-footer {
+        margin-top: 1.5rem;
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+    .auth-footer a { color: var(--ink); font-weight: 600; text-decoration: none; }
+    .auth-footer a:hover { color: var(--accent); }
+
+    .password-strength {
+        height: 3px;
+        background: var(--border);
+        border-radius: 2px;
+        margin-top: 0.4rem;
+        overflow: hidden;
+    }
+    .password-strength-bar {
+        height: 100%;
+        border-radius: 2px;
+        width: 0;
+        transition: width 0.3s, background 0.3s;
+    }
+
+    @media (max-width: 768px) {
+        .auth-page { grid-template-columns: 1fr; }
+        .auth-visual { display: none; }
+        .auth-form-side { padding: 2rem 1.5rem; }
+        .form-row { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+
+    <!-- Visual side -->
+    <div class="auth-visual">
+        <div class="auth-visual-logo">Oni<span>stuka</span></div>
+        <h2 class="auth-visual-title">Join the Onistuka family.</h2>
+        <p class="auth-visual-sub">Create your account in seconds and start shopping premium shoes.</p>
+        <div class="auth-perks">
+            <div class="auth-perk">
+                <div class="auth-perk-icon">🚀</div>
+                Faster checkout on every order
+            </div>
+            <div class="auth-perk">
+                <div class="auth-perk-icon">📦</div>
+                Track all your orders in one place
+            </div>
+            <div class="auth-perk">
+                <div class="auth-perk-icon">🎁</div>
+                Exclusive first-user discount
+            </div>
+            <div class="auth-perk">
+                <div class="auth-perk-icon">❤️</div>
+                Save styles to your wishlist
+            </div>
+        </div>
+    </div>
+
+    <!-- Form side -->
+    <div class="auth-form-side">
+        <div class="auth-box">
+            <h1 class="auth-heading">Create Account</h1>
+            <p class="auth-subheading">Fill in your details to get started</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="id_first_name">First Name</label>
+                        <input class="form-input" type="text" name="first_name" id="id_first_name"
+                               value="{{ form.first_name.value|default:'' }}"
+                               placeholder="Akash" autofocus>
+                        {% if form.first_name.errors %}
+                            <div class="form-error">{{ form.first_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_last_name">Last Name</label>
+                        <input class="form-input" type="text" name="last_name" id="id_last_name"
+                               value="{{ form.last_name.value|default:'' }}"
+                               placeholder="Kumar">
+                        {% if form.last_name.errors %}
+                            <div class="form-error">{{ form.last_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_email">Email Address</label>
+                    <input class="form-input" type="email" name="email" id="id_email"
+                           value="{{ form.email.value|default:'' }}"
+                           placeholder="you@example.com">
+                    {% if form.email.errors %}
+                        <div class="form-error">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_username">Username</label>
+                    <input class="form-input" type="text" name="username" id="id_username"
+                           value="{{ form.username.value|default:'' }}"
+                           placeholder="Choose a username">
+                    {% if form.username.errors %}
+                        <div class="form-error">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_password1">Password</label>
+                    <div style="position:relative;">
+                        <input class="form-input" type="password" name="password1" id="id_password1"
+                               placeholder="Min 8 characters"
+                               style="padding-right:3rem;"
+                               oninput="checkStrength(this.value)">
+                        <button type="button" onclick="togglePwd('id_password1', this)"
+                                style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;">👁</button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="strengthBar"></div>
+                    </div>
+                    {% if form.password1.errors %}
+                        <div class="form-error">{{ form.password1.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_password2">Confirm Password</label>
+                    <div style="position:relative;">
+                        <input class="form-input" type="password" name="password2" id="id_password2"
+                               placeholder="Repeat your password"
+                               style="padding-right:3rem;">
+                        <button type="button" onclick="togglePwd('id_password2', this)"
+                                style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;">👁</button>
+                    </div>
+                    {% if form.password2.errors %}
+                        <div class="form-error">{{ form.password2.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.25rem;">
+                    Create Account
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Already have an account? <a href="{% url 'login' %}">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '👁' : '🙈';
+}
+
+function checkStrength(val) {
+    const bar = document.getElementById('strengthBar');
+    let score = 0;
+    if (val.length >= 8)  score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const colors = ['#e74c3c','#e67e22','#f1c40f','#27ae60'];
+    const widths = ['25%','50%','75%','100%'];
+    bar.style.width  = score > 0 ? widths[score-1] : '0';
+    bar.style.background = score > 0 ? colors[score-1] : '';
+}
+</script>
+{% endblock %}
