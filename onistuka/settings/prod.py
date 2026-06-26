@@ -76,8 +76,7 @@ if REDIS_URL:
             'TIMEOUT':    300,
         }
     }
-    SESSION_ENGINE      = 'django.contrib.sessions.backends.cache'
-    SESSION_CACHE_ALIAS = 'default'
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
     CELERY_BROKER_URL     = REDIS_URL
     CELERY_RESULT_BACKEND = REDIS_URL
 else:
