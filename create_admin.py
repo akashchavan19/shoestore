@@ -6,12 +6,13 @@ django.setup()
 
 from django.contrib.auth.models import User
 
-# Delete existing and recreate fresh
+# Force delete and recreate
 User.objects.filter(username='admin').delete()
+User.objects.filter(is_superuser=True).delete()
 
-User.objects.create_superuser(
+user = User.objects.create_superuser(
     username='admin',
     email='akashshivachavan99@gmail.com',
-    password='Akash@Admin2026'
+    password='Admin1234'
 )
-print('Superuser created fresh')
+print(f'Superuser created: {user.username}')
