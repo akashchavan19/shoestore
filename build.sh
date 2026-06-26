@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-# build.sh — runs on every deploy on Railway/Render
-# Make this executable: chmod +x build.sh
-
-set -e  # Exit immediately if any command fails
+set -e
 
 echo "=== Installing dependencies ==="
 pip install -r requirements.txt
@@ -12,5 +9,8 @@ python manage.py collectstatic --noinput
 
 echo "=== Running migrations ==="
 python manage.py migrate --noinput
+
+echo "=== Creating superuser ==="
+python create_admin.py
 
 echo "=== Build complete ==="
