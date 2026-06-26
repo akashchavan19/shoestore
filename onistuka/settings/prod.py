@@ -56,35 +56,39 @@ CSRF_COOKIE_SAMESITE           = 'Lax'
 # ---------------------------------------------------------------------------
 # Redis — cache + sessions + Celery broker
 # ---------------------------------------------------------------------------
-REDIS_URL = env('REDIS_URL')  # noqa: F405
-# e.g. REDIS_URL=redis://127.0.0.1:6379/1
+  # noqa: F405
+# Redis cache — graceful fallback to database if Redis not available
+REDIS_URL = env('REDIS_URL', default='')  # noqa: F405
 
-CACHES = {
-    'default': {
-        'BACKEND':  'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
-        'OPTIONS': {
-            'CLIENT_CLASS':           'django_redis.client.DefaultClient',
-            'SOCKET_CONNECT_TIMEOUT': 5,
-            'SOCKET_TIMEOUT':         5,
-            # Degrade gracefully if Redis goes down — don't crash the site
-            'IGNORE_EXCEPTIONS':      True,
-            # Compress values > 10KB automatically
-            'COMPRESSOR':             'django_redis.compressors.zlib.ZlibCompressor',
-        },
-        'KEY_PREFIX': 'onistuka',
-        'TIMEOUT':    300,  # 5 minute default TTL
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND':  'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS':           'django_redis.client.DefaultClient',
+                'SOCKET_CONNECT_TIMEOUT': 5,
+                'SOCKET_TIMEOUT':         5,
+                'IGNORE_EXCEPTIONS':      True,
+                'COMPRESSOR':             'django_redis.compressors.zlib.ZlibCompressor',
+            },
+            'KEY_PREFIX': 'onistuka',
+            'TIMEOUT':    300,
+        }
     }
-}
-
-# Redis-backed sessions — fast, scalable
-SESSION_ENGINE      = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
-
-# Celery uses Redis as broker
-CELERY_BROKER_URL     = REDIS_URL
-CELERY_RESULT_BACKEND = REDIS_URL
-
+    SESSION_ENGINE      = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+    CELERY_BROKER_URL     = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
+else:
+    # No Redis — use database cache (works on free Render plan)
+    CACHES = {
+        'default': {
+            'BACKEND':  'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'cache_table',
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 # ---------------------------------------------------------------------------
 # Email — SMTP (e.g. SendGrid, Mailgun, AWS SES)
 # ---------------------------------------------------------------------------
